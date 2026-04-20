@@ -3,20 +3,33 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: Law Firm Management API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: auth
+    description: Authentication
+  - name: clients
+    description: Client management
+  - name: cases
+    description: Case/process management
+  - name: lawyers
+    description: Lawyer management
+  - name: blog
+    description: Blog posts
+  - name: notifications
+    description: Internal notifications
+  - name: dashboard
+    description: Dashboard data
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,6 +37,593 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /auth/login:
+    post:
+      operationId: login
+      tags: [auth]
+      summary: Admin login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginBody"
+      responses:
+        "200":
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoginResponse"
+        "401":
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /auth/logout:
+    post:
+      operationId: logout
+      tags: [auth]
+      summary: Admin logout
+      responses:
+        "200":
+          description: Logged out
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /auth/me:
+    get:
+      operationId: getMe
+      tags: [auth]
+      summary: Get current user
+      responses:
+        "200":
+          description: Current user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Lawyer"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /lawyers:
+    get:
+      operationId: getLawyers
+      tags: [lawyers]
+      summary: List all lawyers
+      responses:
+        "200":
+          description: Lawyers list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Lawyer"
+    post:
+      operationId: createLawyer
+      tags: [lawyers]
+      summary: Create a lawyer account
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateLawyerBody"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Lawyer"
+
+  /lawyers/{id}:
+    get:
+      operationId: getLawyer
+      tags: [lawyers]
+      summary: Get a lawyer
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Lawyer
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Lawyer"
+    put:
+      operationId: updateLawyer
+      tags: [lawyers]
+      summary: Update a lawyer
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateLawyerBody"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Lawyer"
+
+  /clients:
+    get:
+      operationId: getClients
+      tags: [clients]
+      summary: List all clients
+      parameters:
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        "200":
+          description: Clients list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ClientsPage"
+    post:
+      operationId: createClient
+      tags: [clients]
+      summary: Create a client
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateClientBody"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Client"
+
+  /clients/{id}:
+    get:
+      operationId: getClient
+      tags: [clients]
+      summary: Get a client
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Client
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Client"
+    put:
+      operationId: updateClient
+      tags: [clients]
+      summary: Update a client
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateClientBody"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Client"
+    delete:
+      operationId: deleteClient
+      tags: [clients]
+      summary: Delete a client
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /cases:
+    get:
+      operationId: getCases
+      tags: [cases]
+      summary: List all cases
+      parameters:
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [active, pending, closed, archived]
+        - name: lawyerId
+          in: query
+          schema:
+            type: integer
+        - name: clientId
+          in: query
+          schema:
+            type: integer
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        "200":
+          description: Cases list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CasesPage"
+    post:
+      operationId: createCase
+      tags: [cases]
+      summary: Create a case
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCaseBody"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Case"
+
+  /cases/{id}:
+    get:
+      operationId: getCase
+      tags: [cases]
+      summary: Get a case with timeline
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Case with timeline
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CaseDetail"
+    put:
+      operationId: updateCase
+      tags: [cases]
+      summary: Update a case
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateCaseBody"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Case"
+    delete:
+      operationId: deleteCase
+      tags: [cases]
+      summary: Delete a case
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /cases/{id}/timeline:
+    post:
+      operationId: addTimelineEvent
+      tags: [cases]
+      summary: Add timeline event to a case
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateTimelineEventBody"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TimelineEvent"
+
+  /blog:
+    get:
+      operationId: getBlogPosts
+      tags: [blog]
+      summary: List blog posts
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+      responses:
+        "200":
+          description: Blog posts
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BlogPostsPage"
+    post:
+      operationId: createBlogPost
+      tags: [blog]
+      summary: Create a blog post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateBlogPostBody"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BlogPost"
+
+  /blog/{id}:
+    get:
+      operationId: getBlogPost
+      tags: [blog]
+      summary: Get a blog post
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Blog post
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BlogPost"
+    put:
+      operationId: updateBlogPost
+      tags: [blog]
+      summary: Update a blog post
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateBlogPostBody"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BlogPost"
+    delete:
+      operationId: deleteBlogPost
+      tags: [blog]
+      summary: Delete a blog post
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /notifications:
+    get:
+      operationId: getNotifications
+      tags: [notifications]
+      summary: Get notifications for current user
+      responses:
+        "200":
+          description: Notifications
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Notification"
+    post:
+      operationId: createNotification
+      tags: [notifications]
+      summary: Create a notification
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateNotificationBody"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Notification"
+
+  /notifications/{id}/read:
+    put:
+      operationId: markNotificationRead
+      tags: [notifications]
+      summary: Mark notification as read
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Notification"
+
+  /dashboard/summary:
+    get:
+      operationId: getDashboardSummary
+      tags: [dashboard]
+      summary: Get dashboard summary stats
+      responses:
+        "200":
+          description: Summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardSummary"
+
+  /dashboard/recent-activity:
+    get:
+      operationId: getRecentActivity
+      tags: [dashboard]
+      summary: Get recent activity feed
+      responses:
+        "200":
+          description: Recent activity
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ActivityItem"
+
+  /dashboard/cases-by-status:
+    get:
+      operationId: getCasesByStatus
+      tags: [dashboard]
+      summary: Get case counts by status
+      responses:
+        "200":
+          description: Cases by status
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CaseStatusCount"
+
+  /dashboard/workload:
+    get:
+      operationId: getLawyerWorkload
+      tags: [dashboard]
+      summary: Get workload per lawyer
+      responses:
+        "200":
+          description: Workload
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/LawyerWorkload"
+
 components:
   schemas:
     HealthStatus:
@@ -31,6 +631,509 @@ components:
       properties:
         status:
           type: string
-      required:
-        - status
+      required: [status]
 
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+      required: [error]
+
+    SuccessResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+      required: [success]
+
+    LoginBody:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+      required: [email, password]
+
+    LoginResponse:
+      type: object
+      properties:
+        lawyer:
+          $ref: "#/components/schemas/Lawyer"
+        message:
+          type: string
+      required: [lawyer]
+
+    Lawyer:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        email:
+          type: string
+        oab:
+          type: string
+        specialty:
+          type: string
+        bio:
+          type: string
+        avatarUrl:
+          type: string
+        isAdmin:
+          type: boolean
+        activeCaseCount:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+      required: [id, name, email, oab]
+
+    CreateLawyerBody:
+      type: object
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+        password:
+          type: string
+        oab:
+          type: string
+        specialty:
+          type: string
+        bio:
+          type: string
+        isAdmin:
+          type: boolean
+      required: [name, email, password, oab]
+
+    UpdateLawyerBody:
+      type: object
+      properties:
+        name:
+          type: string
+        oab:
+          type: string
+        specialty:
+          type: string
+        bio:
+          type: string
+        avatarUrl:
+          type: string
+
+    Client:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+        cpf:
+          type: string
+        address:
+          type: string
+        notes:
+          type: string
+        activeCaseCount:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+      required: [id, name, email]
+
+    CreateClientBody:
+      type: object
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+        cpf:
+          type: string
+        address:
+          type: string
+        notes:
+          type: string
+      required: [name, email]
+
+    UpdateClientBody:
+      type: object
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+        cpf:
+          type: string
+        address:
+          type: string
+        notes:
+          type: string
+
+    ClientsPage:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/Client"
+        total:
+          type: integer
+        page:
+          type: integer
+        limit:
+          type: integer
+      required: [data, total, page, limit]
+
+    Case:
+      type: object
+      properties:
+        id:
+          type: integer
+        caseNumber:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        status:
+          type: string
+          enum: [active, pending, closed, archived]
+        priority:
+          type: string
+          enum: [low, medium, high, urgent]
+        caseType:
+          type: string
+        clientId:
+          type: integer
+        lawyerId:
+          type: integer
+        client:
+          $ref: "#/components/schemas/Client"
+        lawyer:
+          $ref: "#/components/schemas/Lawyer"
+        deadline:
+          type: string
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required: [id, title, status, priority, clientId, lawyerId]
+
+    CaseDetail:
+      allOf:
+        - $ref: "#/components/schemas/Case"
+        - type: object
+          properties:
+            timeline:
+              type: array
+              items:
+                $ref: "#/components/schemas/TimelineEvent"
+
+    CreateCaseBody:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        status:
+          type: string
+          enum: [active, pending, closed, archived]
+          default: pending
+        priority:
+          type: string
+          enum: [low, medium, high, urgent]
+          default: medium
+        caseType:
+          type: string
+        clientId:
+          type: integer
+        lawyerId:
+          type: integer
+        deadline:
+          type: string
+          format: date-time
+      required: [title, clientId, lawyerId]
+
+    UpdateCaseBody:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        status:
+          type: string
+          enum: [active, pending, closed, archived]
+        priority:
+          type: string
+          enum: [low, medium, high, urgent]
+        caseType:
+          type: string
+        lawyerId:
+          type: integer
+        deadline:
+          type: string
+          format: date-time
+
+    CasesPage:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/Case"
+        total:
+          type: integer
+        page:
+          type: integer
+        limit:
+          type: integer
+      required: [data, total, page, limit]
+
+    TimelineEvent:
+      type: object
+      properties:
+        id:
+          type: integer
+        caseId:
+          type: integer
+        lawyerId:
+          type: integer
+        lawyer:
+          $ref: "#/components/schemas/Lawyer"
+        title:
+          type: string
+        description:
+          type: string
+        eventType:
+          type: string
+          enum: [note, hearing, document, deadline, update, status_change]
+        eventDate:
+          type: string
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+      required: [id, caseId, title, eventType, eventDate]
+
+    CreateTimelineEventBody:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        eventType:
+          type: string
+          enum: [note, hearing, document, deadline, update, status_change]
+          default: note
+        eventDate:
+          type: string
+          format: date-time
+      required: [title, eventType, eventDate]
+
+    BlogPost:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        slug:
+          type: string
+        excerpt:
+          type: string
+        content:
+          type: string
+        category:
+          type: string
+        authorId:
+          type: integer
+        author:
+          $ref: "#/components/schemas/Lawyer"
+        published:
+          type: boolean
+        publishedAt:
+          type: string
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+      required: [id, title, slug, content]
+
+    CreateBlogPostBody:
+      type: object
+      properties:
+        title:
+          type: string
+        excerpt:
+          type: string
+        content:
+          type: string
+        category:
+          type: string
+        published:
+          type: boolean
+          default: false
+      required: [title, content]
+
+    UpdateBlogPostBody:
+      type: object
+      properties:
+        title:
+          type: string
+        excerpt:
+          type: string
+        content:
+          type: string
+        category:
+          type: string
+        published:
+          type: boolean
+
+    BlogPostsPage:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/BlogPost"
+        total:
+          type: integer
+        page:
+          type: integer
+        limit:
+          type: integer
+      required: [data, total, page, limit]
+
+    Notification:
+      type: object
+      properties:
+        id:
+          type: integer
+        recipientId:
+          type: integer
+        senderId:
+          type: integer
+        sender:
+          $ref: "#/components/schemas/Lawyer"
+        title:
+          type: string
+        message:
+          type: string
+        type:
+          type: string
+          enum: [case_assigned, case_updated, deadline_reminder, message, system]
+        caseId:
+          type: integer
+        read:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+      required: [id, recipientId, title, message, type, read]
+
+    CreateNotificationBody:
+      type: object
+      properties:
+        recipientId:
+          type: integer
+        title:
+          type: string
+        message:
+          type: string
+        type:
+          type: string
+          enum: [case_assigned, case_updated, deadline_reminder, message, system]
+        caseId:
+          type: integer
+      required: [recipientId, title, message, type]
+
+    DashboardSummary:
+      type: object
+      properties:
+        totalClients:
+          type: integer
+        totalCases:
+          type: integer
+        activeCases:
+          type: integer
+        pendingCases:
+          type: integer
+        closedCases:
+          type: integer
+        urgentCases:
+          type: integer
+        unreadNotifications:
+          type: integer
+      required: [totalClients, totalCases, activeCases, pendingCases, closedCases, urgentCases, unreadNotifications]
+
+    ActivityItem:
+      type: object
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+          enum: [case_created, case_updated, client_added, timeline_event, blog_published]
+        title:
+          type: string
+        description:
+          type: string
+        lawyer:
+          $ref: "#/components/schemas/Lawyer"
+        caseId:
+          type: integer
+        clientId:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+      required: [id, type, title, createdAt]
+
+    CaseStatusCount:
+      type: object
+      properties:
+        status:
+          type: string
+        count:
+          type: integer
+        label:
+          type: string
+      required: [status, count, label]
+
+    LawyerWorkload:
+      type: object
+      properties:
+        lawyer:
+          $ref: "#/components/schemas/Lawyer"
+        activeCases:
+          type: integer
+        pendingCases:
+          type: integer
+        totalCases:
+          type: integer
+        urgentCases:
+          type: integer
+      required: [lawyer, activeCases, pendingCases, totalCases, urgentCases]

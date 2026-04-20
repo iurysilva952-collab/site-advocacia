@@ -1,0 +1,20 @@
+uploads = []
+outputs = []
+
+[[generated]]
+id = "-wmFRA0eIv1iScewwsMJ3"
+uri = "file://artifacts/law-firm/src/assets/hero.png"
+type = "image"
+title = "Dark law office hero"
+
+[[generated]]
+id = "LokV3yB3Zt5twMlGIKIO6"
+uri = "file://artifacts/law-firm/src/assets/office.png"
+type = "image"
+title = "Firm presentation office"
+
+[[generated]]
+id = "_VfjdAXA5xuEtSUqptO0C"
+uri = "file://artifacts/law-firm/src/assets/team.png"
+type = "image"
+title = "Lawyers team"
