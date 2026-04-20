@@ -29,7 +29,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
     document.documentElement.classList.add("dark");
   }, []);
 
-  const unreadCount = notificationsData?.data.filter(n => !n.read).length || 0;
+  const unreadCount = (Array.isArray(notificationsData) ? notificationsData : []).filter(n => !n.read).length || 0;
 
   const navItems = [
     { icon: LayoutDashboard, label: "Dashboard", href: "/admin/dashboard" },

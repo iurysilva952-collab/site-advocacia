@@ -1,4 +1,4 @@
-import { Switch, Route, Router as WouterRouter, useLocation } from "wouter";
+import { Switch, Route, Router as WouterRouter, useLocation, Redirect } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -33,53 +33,93 @@ const queryClient = new QueryClient({
   },
 });
 
-function ProtectedRoute({ component: Component, ...rest }: any) {
+function ProtectedRoute({ component: Component }: { component: React.ComponentType }) {
   const { user, isLoading } = useAuth();
-  const [, setLocation] = useLocation();
 
   if (isLoading) {
-    return <div className="min-h-screen flex items-center justify-center bg-zinc-950 text-white">Carregando...</div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-zinc-950 text-white">
+        Carregando...
+      </div>
+    );
   }
 
   if (!user) {
-    setLocation("/admin/login");
-    return null;
+    return <Redirect to="/admin/login" />;
   }
 
-  return <Component {...rest} />;
+  return <Component />;
 }
 
-function Router() {
+function AdminRoutes() {
   return (
     <Switch>
       <Route path="/admin/login" component={Login} />
-      <Route path="/admin*">
+      <Route path="/admin/dashboard">
         <AdminLayout>
-          <Switch>
-            <Route path="/admin/dashboard"><ProtectedRoute component={Dashboard} /></Route>
-            <Route path="/admin/clients"><ProtectedRoute component={Clients} /></Route>
-            <Route path="/admin/clients/:id"><ProtectedRoute component={ClientDetail} /></Route>
-            <Route path="/admin/cases"><ProtectedRoute component={Cases} /></Route>
-            <Route path="/admin/cases/:id"><ProtectedRoute component={CaseDetail} /></Route>
-            <Route path="/admin/lawyers"><ProtectedRoute component={Lawyers} /></Route>
-            <Route path="/admin/blog"><ProtectedRoute component={AdminBlogList} /></Route>
-            <Route path="/admin/notifications"><ProtectedRoute component={Notifications} /></Route>
-            <Route component={NotFound} />
-          </Switch>
+          <ProtectedRoute component={Dashboard} />
         </AdminLayout>
       </Route>
-      <Route path="*">
-        <PublicLayout>
-          <Switch>
-            <Route path="/" component={Home} />
-            <Route path="/blog" component={BlogList} />
-            <Route path="/blog/:id" component={BlogPost} />
-            <Route component={NotFound} />
-          </Switch>
-        </PublicLayout>
+      <Route path="/admin/clients/:id">
+        <AdminLayout>
+          <ProtectedRoute component={ClientDetail} />
+        </AdminLayout>
+      </Route>
+      <Route path="/admin/clients">
+        <AdminLayout>
+          <ProtectedRoute component={Clients} />
+        </AdminLayout>
+      </Route>
+      <Route path="/admin/cases/:id">
+        <AdminLayout>
+          <ProtectedRoute component={CaseDetail} />
+        </AdminLayout>
+      </Route>
+      <Route path="/admin/cases">
+        <AdminLayout>
+          <ProtectedRoute component={Cases} />
+        </AdminLayout>
+      </Route>
+      <Route path="/admin/lawyers">
+        <AdminLayout>
+          <ProtectedRoute component={Lawyers} />
+        </AdminLayout>
+      </Route>
+      <Route path="/admin/blog">
+        <AdminLayout>
+          <ProtectedRoute component={AdminBlogList} />
+        </AdminLayout>
+      </Route>
+      <Route path="/admin/notifications">
+        <AdminLayout>
+          <ProtectedRoute component={Notifications} />
+        </AdminLayout>
+      </Route>
+      <Route path="/admin">
+        <Redirect to="/admin/dashboard" />
       </Route>
     </Switch>
   );
+}
+
+function PublicRoutes() {
+  return (
+    <PublicLayout>
+      <Switch>
+        <Route path="/" component={Home} />
+        <Route path="/blog" component={BlogList} />
+        <Route path="/blog/:id" component={BlogPost} />
+        <Route component={NotFound} />
+      </Switch>
+    </PublicLayout>
+  );
+}
+
+function Router() {
+  const [location] = useLocation();
+  const isAdmin = location.startsWith("/admin");
+
+  return isAdmin ? <AdminRoutes /> : <PublicRoutes />;
 }
 
 function App() {

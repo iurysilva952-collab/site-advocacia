@@ -11,9 +11,12 @@ export default function Notifications() {
   const markAsRead = useMarkNotificationRead();
   const queryClient = useQueryClient();
 
+  // API returns array directly
+  const notifications = Array.isArray(notificationsData) ? notificationsData : [];
+
   const handleMarkAsRead = async (id: number) => {
     try {
-      await markAsRead.mutateAsync({ data: { notificationId: id } });
+      await markAsRead.mutateAsync({ id });
       queryClient.invalidateQueries({ queryKey: getGetNotificationsQueryKey() });
     } catch (error) {
       console.error(error);
@@ -21,9 +24,9 @@ export default function Notifications() {
   };
 
   const handleMarkAllAsRead = async () => {
-    const unread = notificationsData?.data.filter(n => !n.read) || [];
+    const unread = notifications.filter(n => !n.read);
     for (const notif of unread) {
-      await markAsRead.mutateAsync({ data: { notificationId: notif.id } });
+      await markAsRead.mutateAsync({ id: notif.id });
     }
     queryClient.invalidateQueries({ queryKey: getGetNotificationsQueryKey() });
   };
@@ -42,7 +45,7 @@ export default function Notifications() {
     return <div className="text-center py-20 text-zinc-500">Carregando...</div>;
   }
 
-  const unreadCount = notificationsData?.data.filter(n => !n.read).length || 0;
+  const unreadCount = notifications.filter(n => !n.read).length;
 
   return (
     <div className="space-y-6 max-w-4xl mx-auto">
@@ -51,21 +54,21 @@ export default function Notifications() {
           <h1 className="text-3xl font-serif font-bold text-white mb-2">Notificações</h1>
           <p className="text-zinc-400">Suas atualizações e alertas do sistema</p>
         </div>
-        
+
         {unreadCount > 0 && (
           <Button variant="outline" className="border-zinc-700 text-zinc-300 hover:bg-zinc-800" onClick={handleMarkAllAsRead}>
-            <CheckCircle2 className="w-4 h-4 mr-2" /> Marcar todas como lidas
+            <CheckCircle2 className="w-4 h-4 mr-2" /> Marcar todas como lidas ({unreadCount})
           </Button>
         )}
       </div>
 
       <div className="space-y-3">
-        {notificationsData?.data.length === 0 ? (
+        {notifications.length === 0 ? (
           <div className="text-center py-20 text-zinc-500 border border-zinc-800 border-dashed rounded-lg bg-zinc-900/20">
             Você não possui notificações.
           </div>
         ) : (
-          notificationsData?.data.map((notif) => (
+          notifications.map((notif) => (
             <Card key={notif.id} className={`border-zinc-800 transition-colors ${notif.read ? 'bg-[#121214]/50' : 'bg-zinc-900 border-l-2 border-l-amber-500'}`}>
               <CardContent className="p-4 sm:p-5 flex gap-4">
                 <div className={`mt-1 flex-shrink-0 ${notif.read ? 'opacity-50' : 'opacity-100'}`}>
@@ -85,11 +88,11 @@ export default function Notifications() {
                   <p className={`text-sm leading-relaxed mb-3 ${notif.read ? 'text-zinc-500' : 'text-zinc-300'}`}>
                     {notif.message}
                   </p>
-                  
+
                   {!notif.read && (
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
+                    <Button
+                      variant="ghost"
+                      size="sm"
                       className="h-8 px-3 text-xs text-amber-500 hover:text-amber-400 hover:bg-amber-500/10"
                       onClick={() => handleMarkAsRead(notif.id)}
                     >
