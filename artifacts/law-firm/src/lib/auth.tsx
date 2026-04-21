@@ -1,4 +1,4 @@
-import { createContext, useContext, ReactNode, useState, useEffect } from "react";
+import { createContext, useContext, ReactNode } from "react";
 import { useGetMe, Lawyer, useLogout } from "@workspace/api-client-react";
 import { useLocation } from "wouter";
 
@@ -12,8 +12,12 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const { data: user, isLoading, refetch } = useGetMe({
-    query: { retry: false },
+    query: {
+      queryKey: ["me"],
+      retry: false,
+    },
   });
+
   const logoutMutation = useLogout();
   const [, setLocation] = useLocation();
 
@@ -32,8 +36,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
 export function useAuth() {
   const context = useContext(AuthContext);
+
   if (context === undefined) {
     throw new Error("useAuth must be used within an AuthProvider");
   }
+
   return context;
 }
