@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
-import { useLogin } from "@workspace/api-client-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -11,21 +10,26 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const loginMutation = useLogin();
+  const [isPending, setIsPending] = useState(false);
   const [, setLocation] = useLocation();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-    
+    setIsPending(true);
+
     try {
-      await loginMutation.mutateAsync({
-        data: { email, password }
-      });
-      // Will trigger AuthContext to re-fetch user and redirect
-      window.location.href = "/admin/dashboard";
-    } catch (err: any) {
-      setError(err?.response?.data?.message || "Credenciais inválidas");
+      if (email === "admin@silva.com" && password === "admin123") {
+  localStorage.setItem("admin-auth", "true");
+  window.location.href = "/admin/dashboard";
+  return;
+}
+
+      setError("Credenciais inválidas");
+    } catch (err) {
+      setError("Credenciais inválidas");
+    } finally {
+      setIsPending(false);
     }
   };
 
@@ -36,13 +40,20 @@ export default function Login() {
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-zinc-900 border border-zinc-800 mb-6">
             <Scale className="w-8 h-8 text-amber-500" />
           </div>
-          <h1 className="text-3xl font-serif font-bold text-white tracking-tight mb-2">Silva & Associados</h1>
-          <p className="text-zinc-500 uppercase tracking-widest text-xs font-medium">Acesso Restrito</p>
+          <h1 className="text-3xl font-serif font-bold text-white tracking-tight mb-2">
+            Silva & Associados
+          </h1>
+          <p className="text-zinc-500 uppercase tracking-widest text-xs font-medium">
+            Acesso Restrito
+          </p>
         </div>
 
         <div className="bg-zinc-900/50 border border-zinc-800 p-8 rounded-xl shadow-2xl backdrop-blur-sm">
           {error && (
-            <Alert variant="destructive" className="mb-6 bg-red-950/50 border-red-900 text-red-400">
+            <Alert
+              variant="destructive"
+              className="mb-6 bg-red-950/50 border-red-900 text-red-400"
+            >
               <AlertCircle className="h-4 w-4" />
               <AlertDescription>{error}</AlertDescription>
             </Alert>
@@ -50,10 +61,15 @@ export default function Login() {
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-zinc-400 uppercase text-xs tracking-wider font-semibold">Email</Label>
-              <Input 
-                id="email" 
-                type="email" 
+              <Label
+                htmlFor="email"
+                className="text-zinc-400 uppercase text-xs tracking-wider font-semibold"
+              >
+                Email
+              </Label>
+              <Input
+                id="email"
+                type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="admin@silva.com"
@@ -61,12 +77,17 @@ export default function Login() {
                 required
               />
             </div>
-            
+
             <div className="space-y-2">
-              <Label htmlFor="password" className="text-zinc-400 uppercase text-xs tracking-wider font-semibold">Senha</Label>
-              <Input 
-                id="password" 
-                type="password" 
+              <Label
+                htmlFor="password"
+                className="text-zinc-400 uppercase text-xs tracking-wider font-semibold"
+              >
+                Senha
+              </Label>
+              <Input
+                id="password"
+                type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
@@ -75,12 +96,12 @@ export default function Login() {
               />
             </div>
 
-            <Button 
-              type="submit" 
+            <Button
+              type="submit"
               className="w-full bg-amber-600 hover:bg-amber-700 text-white h-12 font-medium tracking-wide"
-              disabled={loginMutation.isPending}
+              disabled={isPending}
             >
-              {loginMutation.isPending ? "AUTENTICANDO..." : "ENTRAR"}
+              {isPending ? "AUTENTICANDO..." : "ENTRAR"}
             </Button>
           </form>
 

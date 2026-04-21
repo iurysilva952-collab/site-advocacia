@@ -1,5 +1,5 @@
-import { createContext, useContext, ReactNode } from "react";
-import { useGetMe, Lawyer, useLogout } from "@workspace/api-client-react";
+import { createContext, useContext, ReactNode, useMemo } from "react";
+import { Lawyer } from "@workspace/api-client-react";
 import { useLocation } from "wouter";
 
 interface AuthContextType {
@@ -10,28 +10,33 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export function AuthProvider({ children }: { children: ReactNode }) {
-  const { data: user, isLoading, refetch } = useGetMe({
-    query: {
-      queryKey: ["me"],
-      retry: false,
-    },
-  });
+const demoAdminUser: Lawyer = {
+  id: 1,
+  name: "Administrador",
+  email: "admin@silva.com",
+  role: "admin",
+} as Lawyer;
 
-  const logoutMutation = useLogout();
+export function AuthProvider({ children }: { children: ReactNode }) {
   const [, setLocation] = useLocation();
 
-  const handleLogout = async () => {
-    await logoutMutation.mutateAsync();
-    await refetch();
-    setLocation("/admin/login");
-  };
+  const isLocalAdmin =
+    typeof window !== "undefined" &&
+    localStorage.getItem("admin-auth") === "true";
 
-  return (
-    <AuthContext.Provider value={{ user: user || null, isLoading, logout: handleLogout }}>
-      {children}
-    </AuthContext.Provider>
+  const value = useMemo<AuthContextType>(
+    () => ({
+      user: isLocalAdmin ? demoAdminUser : null,
+      isLoading: false,
+      logout: () => {
+        localStorage.removeItem("admin-auth");
+        setLocation("/admin/login");
+      },
+    }),
+    [isLocalAdmin, setLocation]
   );
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
 export function useAuth() {
