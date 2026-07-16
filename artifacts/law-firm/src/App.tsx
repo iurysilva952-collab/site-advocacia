@@ -34,7 +34,11 @@ const queryClient = new QueryClient({
   },
 });
 
-function ProtectedRoute({ component: Component }: { component: React.ComponentType }) {
+function ProtectedRoute({
+  component: Component,
+}: {
+  component: React.ComponentType;
+}) {
   const { user, isLoading } = useAuth();
 
   if (isLoading) {
@@ -56,46 +60,56 @@ function AdminRoutes() {
   return (
     <Switch>
       <Route path="/admin/login" component={Login} />
+
+      {/* TESTE */}
       <Route path="/admin/dashboard">
         <AdminLayout>
-          <ProtectedRoute component={Dashboard} />
+          <Dashboard />
         </AdminLayout>
       </Route>
+
       <Route path="/admin/clients/:id">
         <AdminLayout>
           <ProtectedRoute component={ClientDetail} />
         </AdminLayout>
       </Route>
+
       <Route path="/admin/clients">
         <AdminLayout>
           <ProtectedRoute component={Clients} />
         </AdminLayout>
       </Route>
+
       <Route path="/admin/cases/:id">
         <AdminLayout>
           <ProtectedRoute component={CaseDetail} />
         </AdminLayout>
       </Route>
+
       <Route path="/admin/cases">
         <AdminLayout>
           <ProtectedRoute component={Cases} />
         </AdminLayout>
       </Route>
+
       <Route path="/admin/lawyers">
         <AdminLayout>
           <ProtectedRoute component={Lawyers} />
         </AdminLayout>
       </Route>
+
       <Route path="/admin/blog">
         <AdminLayout>
           <ProtectedRoute component={AdminBlogList} />
         </AdminLayout>
       </Route>
+
       <Route path="/admin/notifications">
         <AdminLayout>
           <ProtectedRoute component={Notifications} />
         </AdminLayout>
       </Route>
+
       <Route path="/admin">
         <Redirect to="/admin/dashboard" />
       </Route>
@@ -119,6 +133,7 @@ function PublicRoutes() {
 
 function Router() {
   const [location] = useLocation();
+
   const isAdmin = location.startsWith("/admin");
 
   return isAdmin ? <AdminRoutes /> : <PublicRoutes />;
@@ -128,11 +143,12 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
+        <WouterRouter>
           <AuthProvider>
             <Router />
           </AuthProvider>
         </WouterRouter>
+
         <Toaster />
       </TooltipProvider>
     </QueryClientProvider>
