@@ -1,4 +1,4 @@
-import { Switch, Route, Router as WouterRouter, useLocation, Redirect } from "wouter";
+﻿import { Switch, Route, Router as WouterRouter, useLocation, Redirect } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -9,6 +9,7 @@ import { AuthProvider, useAuth } from "@/lib/auth";
 import Home from "@/pages/public/Home";
 import BlogList from "@/pages/public/BlogList";
 import BlogPost from "@/pages/public/BlogPost";
+import Advogado from "@/pages/public/Advogado";
 
 // Admin Pages
 import Login from "@/pages/admin/Login";
@@ -109,6 +110,7 @@ function PublicRoutes() {
         <Route path="/" component={Home} />
         <Route path="/blog" component={BlogList} />
         <Route path="/blog/:id" component={BlogPost} />
+        <Route path="/advogado" component={Advogado} />
         <Route component={NotFound} />
       </Switch>
     </PublicLayout>

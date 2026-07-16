@@ -1,10 +1,19 @@
-import { ReactNode, useEffect } from "react";
-import { Link } from "wouter";
+﻿import { ReactNode, useEffect } from "react";
+import { Link, useLocation } from "wouter";
 import { MessageCircle } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 export default function PublicLayout({ children }: { children: ReactNode }) {
-  // Force dark mode for the public site to ensure the dark serious vibe
+  const [location, setLocation] = useLocation();
+
+  const goHome = () => {
+    if (location === "/") {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    } else {
+      setLocation("/");
+    }
+  };
+
   useEffect(() => {
     document.documentElement.classList.add("dark");
   }, []);
@@ -22,8 +31,9 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
             </span>
           </Link>
           <nav className="hidden md:flex items-center gap-8 text-sm font-medium tracking-wide">
+            <button onClick={goHome} className="text-zinc-300 hover:text-amber-500 transition-colors uppercase text-xs">Início</button>
             <a href="/#atuacao" className="text-zinc-300 hover:text-amber-500 transition-colors uppercase text-xs">Áreas de Atuação</a>
-            <a href="/#equipe" className="text-zinc-300 hover:text-amber-500 transition-colors uppercase text-xs">A Equipe</a>
+            <a href="/#advogado" className="text-zinc-300 hover:text-amber-500 transition-colors uppercase text-xs">O Advogado</a>
             <Link href="/blog" className="text-zinc-300 hover:text-amber-500 transition-colors uppercase text-xs">Artigos</Link>
             <a href="/#contato" className="text-zinc-300 hover:text-amber-500 transition-colors uppercase text-xs">Contato</a>
           </nav>
@@ -78,16 +88,9 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
         </div>
       </footer>
 
-      {/* WhatsApp Floating Button */}
       <Tooltip>
         <TooltipTrigger asChild>
-          <a
-            href="https://wa.me/5511999999999"
-            target="_blank"
-            rel="norenoopener noreferrer"
-            className="fixed bottom-6 right-6 w-14 h-14 bg-green-600 hover:bg-green-500 text-white rounded-full flex items-center justify-center shadow-2xl hover:scale-110 transition-transform z-50 ring-4 ring-zinc-950"
-            aria-label="Fale conosco no WhatsApp"
-          >
+          <a href="https://wa.me/5511999999999" target="_blank" rel="noopener noreferrer" className="fixed bottom-6 right-6 w-14 h-14 bg-green-600 hover:bg-green-500 text-white rounded-full flex items-center justify-center shadow-2xl hover:scale-110 transition-transform z-50 ring-4 ring-zinc-950" aria-label="Fale conosco no WhatsApp">
             <MessageCircle className="w-7 h-7" />
           </a>
         </TooltipTrigger>

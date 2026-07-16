@@ -3,7 +3,7 @@ import { Link } from "wouter";
 import { motion, AnimatePresence, type Variants } from "framer-motion";
 import { useGetBlogPosts } from "@workspace/api-client-react";
 import { Button } from "@/components/ui/button";
-import { Scale, Shield, Building2, Users, FileText, Landmark, ArrowRight, ChevronRight } from "lucide-react";
+import { Scale, Shield, Building2, Users, FileText, Landmark, ArrowRight, ChevronRight, GraduationCap, Award, BookOpen } from "lucide-react";
 import heroImg from "@/assets/hero.png";
 import officeImg from "@/assets/office.png";
 import teamImg from "@/assets/team.png";
@@ -12,6 +12,13 @@ const prompts = [
   "Está enfrentando um problema jurídico?",
   "Precisa de representação legal confiável?",
   "Seu caso merece atenção especializada.",
+];
+
+const credentials = [
+  { icon: GraduationCap, label: "Formação", value: "Bacharel em Direito" },
+  { icon: Scale, label: "OAB", value: "OAB/SP 000.000" },
+  { icon: Award, label: "Experiência", value: "X anos de atuação" },
+  { icon: BookOpen, label: "Especialização", value: "Área de especialização" },
 ];
 
 const fadeIn: Variants = {
@@ -235,9 +242,9 @@ export default function Home() {
         </div>
       </section>
 
-      <section id="equipe" className="py-24 md:py-32 relative">
+      <section id="advogado" className="py-24 md:py-32 relative">
         <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
             <motion.div
               initial="hidden"
               whileInView="visible"
@@ -246,7 +253,7 @@ export default function Home() {
             >
               <img
                 src={teamImg}
-                alt="Equipe de advogados"
+                alt="Advogado"
                 className="w-full h-[600px] object-cover grayscale border border-zinc-800"
               />
             </motion.div>
@@ -256,32 +263,39 @@ export default function Home() {
               whileInView="visible"
               viewport={{ once: true, margin: "-100px" }}
               variants={staggerContainer}
-              className="flex flex-col justify-center"
             >
               <motion.h2 variants={fadeIn} className="text-amber-500 font-medium tracking-widest uppercase text-sm mb-4">
-                A Equipe
+                O Advogado
               </motion.h2>
-
-              <motion.h3
-                variants={fadeIn}
-                className="text-4xl md:text-5xl font-serif font-bold text-white mb-8 leading-tight"
-              >
-                Advogados Forjados na Complexidade.
+              <motion.h3 variants={fadeIn} className="text-4xl md:text-5xl font-serif font-bold text-white mb-8 leading-tight">
+                Nome do Advogado
               </motion.h3>
+              <motion.div variants={fadeIn} className="space-y-6 text-zinc-400 text-lg leading-relaxed mb-10">
+                <p>
+                  Texto de apresentação profissional, trajetória e filosofia de atuação. Substitua por uma
+                  biografia real destacando experiência, casos relevantes e valores de atuação.
+                </p>
+              </motion.div>
 
-              <motion.p variants={fadeIn} className="text-zinc-400 text-lg leading-relaxed mb-10">
-                Selecionamos os profissionais mais brilhantes e combativos do mercado. Nossa equipe é formada por
-                mestres e doutores com vasta experiência nos tribunais superiores, garantindo uma defesa irretocável em
-                qualquer instância.
-              </motion.p>
+              <motion.div variants={fadeIn} className="grid grid-cols-2 gap-6 mb-10">
+                {credentials.map((item, i) => (
+                  <div key={i} className="flex items-start gap-3">
+                    <item.icon className="w-5 h-5 text-amber-500 mt-1 shrink-0" />
+                    <div>
+                      <p className="text-xs uppercase tracking-wider text-zinc-500">{item.label}</p>
+                      <p className="text-zinc-200 text-sm">{item.value}</p>
+                    </div>
+                  </div>
+                ))}
+              </motion.div>
 
               <motion.div variants={fadeIn}>
                 <Button
-                  variant="outline"
-                  className="border-amber-600 text-amber-500 hover:bg-amber-600 hover:text-white rounded-none px-8 h-12"
+                  size="lg"
+                  className="bg-amber-600 hover:bg-amber-700 text-white rounded-none px-8 h-14 text-base tracking-wide"
                   asChild
                 >
-                  <a href="#equipe">CONHEÇA OS SÓCIOS</a>
+                  <a href="#contato">FALE COM O ADVOGADO</a>
                 </Button>
               </motion.div>
             </motion.div>
