@@ -17,6 +17,14 @@ export default function Dashboard() {
   const { data: activity } = useGetRecentActivity();
   const { data: casesByStatus } = useGetCasesByStatus();
   const { data: workload } = useGetLawyerWorkload();
+  console.log("SUMMARY", summary);
+  console.log("ACTIVITY", activity);
+  console.log("CASES", casesByStatus);
+  console.log("WORKLOAD", workload);
+
+  console.log("ACTIVITY ARRAY", Array.isArray(activity));
+  console.log("CASES ARRAY", Array.isArray(casesByStatus));
+  console.log("WORKLOAD ARRAY", Array.isArray(workload));
 
   const getActivityIcon = (type: string) => {
     switch (type) {
